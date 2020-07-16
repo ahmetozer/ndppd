@@ -14,10 +14,10 @@ FROM alpine AS container
 
 COPY --from=build /usr/src/ndppd/ndppd /usr/sbin/
 
-COPY --from=build /usr/src/ndppd/ndppd.1.gz /share/man/man1
-COPY --from=build /usr/src/ndppd/ndppd.conf.5.gz /share/man/man5
+#COPY --from=build /usr/src/ndppd/ndppd.1.gz /share/man/man1
+#COPY --from=build /usr/src/ndppd/ndppd.conf.5.gz /share/man/man5
 COPY --from=build /usr/sbin/entrypoint.sh /usr/sbin/entrypoint.sh
 
 RUN apk --no-cache add libc6-compat libgcc libstdc++
 
-ENTRYPOINT ["/usr/sbin/entrypoint.sh"]
+CMD ["/usr/sbin/entrypoint.sh"]
