@@ -1,12 +1,40 @@
-# NDPPD
+# NDPPD Container System
 
 ***ndppd***, or ***NDP Proxy Daemon***, is a daemon that proxies *neighbor discovery* messages. It listens for *neighbor solicitations* on a
-specified interface and responds with *neighbor advertisements* - as described in **RFC 4861** (section 7.2). 
+specified interface and responds with *neighbor advertisements* - as described in **RFC 4861** (section 7.2).
 
-## Current status
+## Container
 
-Version 0.x is in maintenance, and is being replaced by `1.0-devel` which you can find [here](https://github.com/DanielAdolfsson/ndppd/tree/1.0-devel). `1.0` is not yet stable enough to be used in production, and I currently have no estimate when it is. Feel free to try it out if you like.
+You can easily run ndppd on your system with docker container.
 
-Latest stable release is 0.2.5:
-- [Download](https://github.com/DanielAdolfsson/ndppd/releases/tag/0.2.5)
-- [README](https://github.com/DanielAdolfsson/ndppd/blob/0.2.5/README)
+You can just run container and system will be automatically detect your /64 prefix and
+your proxy interface.
+
+```bash
+docker run -it --restart always --cap-add NET_ADMIN --cap-add NET_RAW --network host ahmetozer/ndppd
+```
+
+If you want to set default proxy interface by manual, set `PROXY_INTERFACE` variable to your interface.  
+If the program is not detect right IPv6 subnet, please set also `IPv6_SUBNET` variable by manual.
+System normally runs static mode but if you define `DOCKER_INTERFACE`, system only forward requests to your defined docker interface.
+
+```bash
+#       Examples        #
+
+#   Set Proxy Interface by manual
+docker run -it --restart always --cap-add NET_ADMIN --cap-add NET_RAW --network host -e PROXY_INTERFACE="enp0s4" ahmetozer/ndppd
+
+#   Set IPv6 subnet by manual
+docker run -it --restart always --cap-add NET_ADMIN --cap-add NET_RAW --network host -e IPv6_SUBNET="2001:db8:900d:c0de::/64" ahmetozer/ndppd
+
+#   Set IPv6 subnet and Proxy Interface by manual
+docker run -it --restart always --cap-add NET_ADMIN --cap-add NET_RAW --network host -e PROXY_INTERFACE="enp0s4" -e IPv6_SUBNET="2001:db8:900d:c0de::/64" ahmetozer/ndppd
+
+#   Set IPv6 subnet and Proxy Interface by manual and dedicated Docker interface
+docker run -it --restart always --cap-add NET_ADMIN --cap-add NET_RAW --network host -e PROXY_INTERFACE="enp0s4" -e IPv6_SUBNET="2001:db8:900d:c0de::/64" -e DOCKER_INTERFACE="docker0" ahmetozer/ndppd
+
+#   Dedicated Docker interface only
+docker run -it --restart always --cap-add NET_ADMIN --cap-add NET_RAW --network host -e DOCKER_INTERFACE="docker0" ahmetozer/ndppd
+```
+
+If you don't want to run container for NDP proxy, here is bash solution [dockeripv6.sh](https://gist.github.com/ahmetozer/a08345dd9c04e08bf0df342cf079f8fc)
