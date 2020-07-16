@@ -1,5 +1,10 @@
 #!/bin/sh
 TEST_IP="2606:4700:4700::1111"
+function exit_trap() {
+    echo "Program closed."
+}
+
+trap exit_trap INT EXIT
 
 if [ -z "$PROXY_INTERFACE" ]
 then
@@ -21,11 +26,12 @@ fi
 if [ -z "$IPv6_SUBNET" ]
 then
 echo "IPv6_SUBNET is not set. System try to find subnet.
-You can set manualy env variable in docker with -e IPv6=\"2001:db8:900d:c0de::/64\" arg."
+You can set manualy env variable in docker with -e IPv6_SUBNET=\"2001:db8:900d:c0de::/64\" arg."
 IPv6_SUBNET=`ip ro get $TEST_IP | awk -F"src " '{print $2}' | awk -F":" '{print $1":"$2":"$3":"$4"::/64"}'`
 fi
 
-echo "Proxy Interface: $PROXY_INTERFACE
+echo "
+Proxy Interface: $PROXY_INTERFACE
 IPv6 Subnet: $IPv6_SUBNET"
 
 if [ -z "$DOCKER_INTERFACE" ]
@@ -57,18 +63,14 @@ proxy $PROXY_INTERFACE {
 }
 EOF
 fi
-trap exit_trap INT EXIT
+
 
 /usr/sbin/ndppd -c /etc/ndppd.conf -v
 
-if [ $? -eq 0 ]
+
+if [ $? != 0 ]
 then
   echo "Error. ndppd exited with err."
-  sleep 5
-else
-  exit_trap
+  sleep 5   # Prevent too many loops
 fi
 
-function exit_trap() {
-    echo "Program closed."
-}
