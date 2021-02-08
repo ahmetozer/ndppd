@@ -37,4 +37,19 @@ docker run -it --restart always --cap-add NET_ADMIN --cap-add NET_RAW --network 
 docker run -it --restart always --cap-add NET_ADMIN --cap-add NET_RAW --network host -e DOCKER_INTERFACE="docker0" ahmetozer/ndppd
 ```
 
+### Run in other container network
+
+For any reason, you might be run under other container network. For this purpose, you can follow the below examples.
+
+```bash
+docker run -it --rm --privileged -e container_name=net-tools-service -v /proc/:/proc2/ -v /var/run/docker.sock:/var/run/docker.sock --name teredo ahmetozer/ndppd
+```
+
+```bash
+# Please change container_name variable to your container id or name.
+container_name="net-tools-service"
+
+docker run -it --rm --privileged -v /proc/$(docker inspect -f '{{.State.Pid}}' $container_name)/ns/net:/var/run/netns/container ahmetozer/ndppd
+```
+
 If you don't want to run container for NDP proxy, here is bash solution [dockeripv6.sh](https://gist.github.com/ahmetozer/a08345dd9c04e08bf0df342cf079f8fc)
